@@ -1,4 +1,4 @@
-# --- SÄKERHET (Blockera alla nycklar) ---
+# Blockera känsliga certifikat
 *.key
 *.crt
 *.trust
@@ -6,15 +6,9 @@
 *.pem
 *.bak.*
 
-# --- BYGG-ARTEFAKTER (Skräp vi inte vill spara) ---
+# Blockera byggfiler
 ipk_build/
 *.ipk
 *.tar.gz
 debian-binary
-
-# --- LOGGAR & LOKAL HISTORIK ---
-# Vi blockerar loggen eftersom den innehåller din server-URI
 build_log.txt
-# Vi blockerar versionsfilen om du vill att andra ska börja på v1.0
-# (Eller ta bort # nedan om du vill spara versionsnumret i molnet)
-# version.txt
