@@ -1,60 +1,55 @@
-# Tektelic Basic Station Config Builder
+# Tektelic Basic Station Config Builder & Deployer
 
-This tool automates the creation of **Basic Station** configuration packages (`.ipk`) for Tektelic LoRaWAN Gateways (e.g., Kona Macro, Kona Micro). 
+This tool automates the configuration and deployment of **Basic Station** for Tektelic LoRaWAN Gateways (e.g., Kona Macro, Kona Micro). 
 
-It is designed specifically to streamline the deployment of gateways on **ChirpStack v4**, handling certificate formatting, backup file generation, and versioning automatically.
+It is designed for **ChirpStack v4** and features a "Zero-Touch" SSH pipeline that builds, uploads, installs, and configures the gateway in a single pass.
 
 ## 🚀 Features
 
-* **Interactive Input:** Copy-paste certificates directly from the ChirpStack web interface (CA, TLS Cert, TLS Key).
-* **Auto-Sanitization:** Automatically removes Windows carriage returns (`\r`) and fixes missing newlines that cause connection failures.
-* **Backup Generation:** Creates the `.bak` files (e.g., `tc.bak.uri`) that Tektelic firmware often requires to prevent boot loops.
-* **Auto-Versioning:** Increments build numbers (v1.0, v1.1...) automatically to ensure `opkg` updates the configuration without requiring force-reinstall.
-* **Build Logging:** Tracks build history, timestamps, and target URIs in `build_log.txt`.
+* **SSH Pipeline Deployment:** No need for manual `scp` or `opkg` commands. The script streams the installer directly to the gateway over SSH.
+* **Auto-Configuration:** Automatically edits `/etc/default/bstn.toml` to:
+  * Disable CUPS (`skip_cups = true`) to prevent boot delays.
+  * Set UDP Bind Port to `1701` (required for some setups).
+* **Interactive Input:** Paste certificates directly from the ChirpStack web interface.
+* **Smart Sanitization:** fixes Windows line-endings (`\r`) and ensures valid certificate formatting.
+* **Clean Reboot:** Handles gateway restarts gracefully without hanging your terminal.
 
 ## 📋 Prerequisites
 
 * **Linux** or **Git Bash** (Windows).
-* A Tektelic Gateway with SSH access.
+* A Tektelic Gateway with SSH access (root access required for deployment).
 * Gateway credentials generated in ChirpStack.
 
 ## 🛠 Usage
 
-1.  **Run the builder script:**
+1.  **Run the tool:**
     ```bash
     ./build_ipk.sh
     ```
 
-2.  **Follow the interactive prompts:**
-    * **URI:** Paste the Gateway URI (e.g., `wss://eu868.chirpstack.io:3001`).
-    * **Certificates:** Copy the text blocks from ChirpStack for **CA Certificate**, **TLS Certificate**, and **TLS Key**.
-    * *Note: Press ENTER on an empty line to confirm each entry.*
+2.  **Input Configuration:**
+    * Paste the **Gateway URI** (e.g., `wss://eu868.chirpstack.io:3001`).
+    * Paste the **Certificates** (CA, TLS Cert, TLS Key) from ChirpStack.
 
-3.  **Locate the output:**
-    The script will generate a file named `bstn-config-chirpstack.ipk` in the same folder.
+3.  **Deploy (The Magic Step):**
+    * The script will ask: `Connect to gateway? (y/n)`
+    * Type `y` and enter the gateway's IP address.
+    * Enter the **root password** (usually the Gateway ID in UPPERCASE).
 
-## 📦 Installation on Gateway
+    *The script will then automatically:*
+    1.  Transfer the package.
+    2.  Install the IPK.
+    3.  Configure `skip_cups` and `bind_port`.
+    4.  Reboot the gateway.
 
-1.  **Upload the IPK to the gateway:**
-    (Replace `root@192.168.1.10` with your gateway's IP)
-    ```bash
-    scp bstn-config-chirpstack.ipk root@192.168.1.10:/dev/shm/
-    ```
+## 🛡️ Security
 
-2.  **Install via SSH:**
-    Log in to the gateway and run:
-    ```bash
-    opkg install /dev/shm/bstn-config-chirpstack.ipk
-    ```
-    *Since the script auto-increments the version, `opkg` will update the config even if a previous version exists.*
+* **.gitignore:** This repository includes a `.gitignore` file to prevent sensitive keys (`*.key`, `*.crt`, `*.pem`) from being committed to GitHub.
+* **No Temporary Files:** The script cleans up all build artifacts after execution.
 
-3.  **Reboot:**
-    ```bash
-    reboot
-    ```
+## 📝 Troubleshooting
 
-## 🛡️ Security Note
-
-This repository includes a `.gitignore` file to prevent sensitive keys (`*.key`, `*.crt`, `*.pem`) from being committed to the repository. 
-
-**Never force-add your certificates to Git.** Only the builder script and documentation should be version controlled.
+* **"Permission denied" during deploy:**
+    Ensure you are using the **root** password. The `admin` user often does not have permissions to run `opkg install` or edit system files.
+* **"Connection closed" immediately:**
+    This is normal during the reboot phase. The script attempts to exit cleanly, but a fast reboot might drop the connection.
