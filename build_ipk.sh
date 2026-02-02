@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =======================================================
-#   BSTN CONFIG BUILDER & PIPELINE DEPLOYER (v9.1)
+#   BSTN CONFIG BUILDER & DEPLOYER (v10.0 - Full Control)
 # =======================================================
 
 # 1. SETTINGS
@@ -96,32 +96,37 @@ rm -rf "$BUILD_DIR" debian-binary data.tar.gz control.tar.gz
 echo "SUCCESS! Created: $OUTPUT_FILENAME"
 
 # =======================================================
-#   PHASE 2: THE SSH PIPELINE
+#   PHASE 2: DEPLOYMENT (Flexible SSH)
 # =======================================================
 echo ""
 echo "======================================================="
-echo "   ONE-SHOT DEPLOYMENT (SSH PIPE)"
+echo "   DEPLOYMENT"
 echo "======================================================="
-read -p "Connect to gateway? (y/n): " DEPLOY_CONFIRM
+read -p "Do you want to connect and deploy to a gateway? (y/n): " DEPLOY_CONFIRM
 
 if [[ "$DEPLOY_CONFIRM" =~ ^[Yy]$ ]]; then
     echo ""
-    echo "Enter Gateway IP (e.g. 192.168.1.10):"
-    read -r GW_IP
-    GW_USER="root"
+    echo "Enter FULL SSH TARGET."
+    echo "Examples:"
+    echo "  root@192.168.1.10"
+    echo "  admin@10.30.5.1"
+    echo "  root@localhost -p 2222"
+    echo ""
+    read -p "SSH Target: " SSH_TARGET
     
     echo ""
-    echo "--- STARTING PIPELINE ---"
-    echo "Connecting to $GW_IP as $GW_USER..."
+    echo "--- STEP 1: INSTALL & CONFIGURE ---"
+    echo "Connecting to $SSH_TARGET..."
 
-    cat "$OUTPUT_FILENAME" | ssh "$GW_USER@$GW_IP" "
-        echo '>>> 1. Receiving IPK file...'
+    # Vi skickar filen och kör installation + config, men INGEN reboot här.
+    cat "$OUTPUT_FILENAME" | ssh $SSH_TARGET "
+        echo '>>> Receiving IPK file...'
         cat > /dev/shm/$OUTPUT_FILENAME
         
-        echo '>>> 2. Installing...'
+        echo '>>> Installing...'
         opkg install /dev/shm/$OUTPUT_FILENAME
         
-        echo '>>> 3. Configuring $TARGET_FILE...'
+        echo '>>> Configuring $TARGET_FILE...'
         if [ -f $TARGET_FILE ]; then
             $SED_CMD_1
             $SED_CMD_2
@@ -130,19 +135,27 @@ if [[ "$DEPLOY_CONFIRM" =~ ^[Yy]$ ]]; then
         else
             echo '   WARNING: Config file missing.'
         fi
-        
-        echo '>>> 4. Rebooting in 3 seconds (Closing connection)...'
-        # HÄR ÄR FIXEN: Vi lägger reboot i bakgrunden och väntar lite
-        # så att SSH hinner stänga ner snyggt med 'exit 0'
-        (sleep 3; reboot) > /dev/null 2>&1 &
-        exit 0
     "
 
     if [ $? -eq 0 ]; then
         echo ""
-        echo "--- DEPLOYMENT SUCCESSFUL ---"
-        echo "Gateway is restarting now. Give it a minute."
-        echo "   [Deploy]: Success $GW_IP" >> "$LOG_FILE"
+        echo "--- CONFIGURATION COMPLETE ---"
+        echo "   [Deploy]: Install Success ($SSH_TARGET)" >> "$LOG_FILE"
+        
+        # --- STEP 2: OPTIONAL REBOOT ---
+        echo ""
+        read -p "Do you want to REBOOT the gateway now? (y/n): " REBOOT_CONFIRM
+        
+        if [[ "$REBOOT_CONFIRM" =~ ^[Yy]$ ]]; then
+            echo "Rebooting gateway..."
+            # Vi kör en separat SSH-session bara för omstarten
+            ssh $SSH_TARGET "(sleep 3; reboot) > /dev/null 2>&1 & exit 0"
+            echo "Gateway is restarting."
+             echo "   [Deploy]: Reboot triggered" >> "$LOG_FILE"
+        else
+            echo "Skipping reboot. Changes will apply next time the gateway restarts."
+        fi
+        
     else
         echo "--- FAILED ---"
         echo "Error: Access denied or connection failed."

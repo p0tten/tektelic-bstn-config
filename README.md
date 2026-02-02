@@ -31,16 +31,16 @@ It is designed for **ChirpStack v4** and features a "Zero-Touch" SSH pipeline th
     * Paste the **Gateway URI** (e.g., `wss://eu868.chirpstack.io:3001`).
     * Paste the **Certificates** (CA, TLS Cert, TLS Key) from ChirpStack.
 
-3.  **Deploy (The Magic Step):**
-    * The script will ask: `Connect to gateway? (y/n)`
-    * Type `y` and enter the gateway's IP address.
-    * Enter the **root password** (usually the Gateway ID in UPPERCASE).
+3.  **Deploy:**
+    * The script asks: `Connect to gateway? (y/n)`
+    * **Enter SSH Target:** You can now specify full details, e.g.:
+      * `root@192.168.1.10`
+      * `admin@10.20.30.40`
+      * `root@localhost -p 2222` (Reverse Tunnel)
 
-    *The script will then automatically:*
-    1.  Transfer the package.
-    2.  Install the IPK.
-    3.  Configure `skip_cups` and `bind_port`.
-    4.  Reboot the gateway.
+4.  **Reboot:**
+    * After installation, the script asks: `Reboot gateway? (y/n)`
+    * Choose `y` to apply changes immediately, or `n` to wait.
 
 ## 🛡️ Security
 
