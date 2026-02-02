@@ -1,55 +1,29 @@
-# Tektelic Basic Station Config Builder & Deployer
+# Tektelic Basic Station Deployer
 
-This tool automates the configuration and deployment of **Basic Station** for Tektelic LoRaWAN Gateways (e.g., Kona Macro, Kona Micro). 
+Automated tool to build, configure, and deploy **Basic Station** (ChirpStack v4) on Tektelic Gateways.
 
-It is designed for **ChirpStack v4** and features a "Zero-Touch" SSH pipeline that builds, uploads, installs, and configures the gateway in a single pass.
+## Features
+* **Zero-Touch Deploy:** Uploads and installs via SSH piping (no SCP needed).
+* **Auto-Config:** Sets `skip_cups=true` and `bind_port=1701`.
+* **Sanitization:** Fixes Windows line-endings and creates required `.bak` files.
+* **Versioning:** Auto-increments package version to force updates.
 
-## 🚀 Features
+## Usage
 
-* **SSH Pipeline Deployment:** No need for manual `scp` or `opkg` commands. The script streams the installer directly to the gateway over SSH.
-* **Auto-Configuration:** Automatically edits `/etc/default/bstn.toml` to:
-  * Disable CUPS (`skip_cups = true`) to prevent boot delays.
-  * Set UDP Bind Port to `1701` (required for some setups).
-* **Interactive Input:** Paste certificates directly from the ChirpStack web interface.
-* **Smart Sanitization:** fixes Windows line-endings (`\r`) and ensures valid certificate formatting.
-* **Clean Reboot:** Handles gateway restarts gracefully without hanging your terminal.
-
-## 📋 Prerequisites
-
-* **Linux** or **Git Bash** (Windows).
-* A Tektelic Gateway with SSH access (root access required for deployment).
-* Gateway credentials generated in ChirpStack.
-
-## 🛠 Usage
-
-1.  **Run the tool:**
+1.  **Run:**
     ```bash
     ./build_ipk.sh
     ```
 
-2.  **Input Configuration:**
-    * Paste the **Gateway URI** (e.g., `wss://eu868.chirpstack.io:3001`).
-    * Paste the **Certificates** (CA, TLS Cert, TLS Key) from ChirpStack.
+2.  **Input:**
+    * Paste the **Gateway URI** (e.g. `wss://eu868.chirpstack.io:3001`).
+    * Paste Certificates from ChirpStack (CA, TLS Cert, TLS Key).
+    * *Tip: Press ENTER on an empty line to confirm input.*
 
 3.  **Deploy:**
-    * The script asks: `Connect to gateway? (y/n)`
-    * **Enter SSH Target:** You can now specify full details, e.g.:
-      * `root@192.168.1.10`
-      * `admin@10.20.30.40`
-      * `root@localhost -p 2222` (Reverse Tunnel)
+    * Enter SSH Target (e.g. `root@192.168.1.10` or `root@localhost -p 2222`).
+    * Choose whether to reboot immediately after installation.
 
-4.  **Reboot:**
-    * After installation, the script asks: `Reboot gateway? (y/n)`
-    * Choose `y` to apply changes immediately, or `n` to wait.
-
-## 🛡️ Security
-
-* **.gitignore:** This repository includes a `.gitignore` file to prevent sensitive keys (`*.key`, `*.crt`, `*.pem`) from being committed to GitHub.
-* **No Temporary Files:** The script cleans up all build artifacts after execution.
-
-## 📝 Troubleshooting
-
-* **"Permission denied" during deploy:**
-    Ensure you are using the **root** password. The `admin` user often does not have permissions to run `opkg install` or edit system files.
-* **"Connection closed" immediately:**
-    This is normal during the reboot phase. The script attempts to exit cleanly, but a fast reboot might drop the connection.
+## Security
+* **.gitignore:** Prevents keys (`*.key`, `*.crt`) from being committed to git.
+* **Cleanup:** No temporary build files are left on disk.
