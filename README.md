@@ -5,10 +5,3 @@ This repository contains a complete toolkit for deploying a LoRaWAN infrastructu
 The project is organized into two main components:
 1.  **Server Side:** Tools to build the ChirpStack IPK package.
 2.  **Gateway Side:** Tools for remote provisioning and configuration of Tektelic Basic Station.
-
-## Directory Structure
-
-```text
-.
-├── gateway/      # Scripts for remote Tektelic Basic Station deployment
-└── server/       # Scripts for building ChirpStack IPK packages
