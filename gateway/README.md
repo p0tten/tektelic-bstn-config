@@ -35,10 +35,10 @@ The script is executed locally from your computer (via Git Bash or Terminal) and
    ./deploy_gateway.sh
 
 5. Follow the on-screen prompts:
-* Enter the Gateway IP address.
-* Enter the gateway password when requested (you may be asked twice: once for file transfer, once for execution).
-* Paste your certificates when the wizard prompts you.
-* Confirm the port change and reboot.
+* Enter the **Gateway IP address.**
+* Enter the **gateway password** when requested (you may be asked twice: once for file transfer, once for execution).
+* Paste your **certificates** when the wizard prompts you.
+* Confirm the **port change** and **reboot.**
 
 ## Technical Note: Port 1701
 
