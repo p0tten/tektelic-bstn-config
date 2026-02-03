@@ -1,14 +1,8 @@
-# Blockera känsliga certifikat
 *.key
 *.crt
-*.trust
-*.uri
 *.pem
-*.bak.*
-
-# Blockera byggfiler
-ipk_build/
-*.ipk
-*.tar.gz
-debian-binary
-build_log.txt
+*.uri
+*.trust
+bstn.zip
+config.json
+.DS_Store

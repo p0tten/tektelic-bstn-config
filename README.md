@@ -1,29 +1,24 @@
-# Tektelic Basic Station Deployer
+# LoRaWAN Infrastructure Deployment Kit
 
-Automated tool to build, configure, and deploy **Basic Station** (ChirpStack v4) on Tektelic Gateways.
+This repository contains a set of tools designed to automate the deployment of a LoRaWAN infrastructure using ChirpStack and Tektelic Gateways.
 
-## Features
-* **Zero-Touch Deploy:** Uploads and installs via SSH piping (no SCP needed).
-* **Auto-Config:** Sets `skip_cups=true` and `bind_port=1701`.
-* **Sanitization:** Fixes Windows line-endings and creates required `.bak` files.
-* **Versioning:** Auto-increments package version to force updates.
+The project is organized into two main components:
+1.  **Server Side:** Tools to build the ChirpStack IPK package.
+2.  **Gateway Side:** Tools for remote provisioning and configuration of Tektelic Basic Station.
 
-## Usage
+## Directory Structure
 
-1.  **Run:**
-    ```bash
-    ./build_ipk.sh
-    ```
+* `/server` - Scripts for building the ChirpStack `.ipk` package.
+* `/gateway` - Scripts for deploying Basic Station to Tektelic gateways remotely.
 
-2.  **Input:**
-    * Paste the **Gateway URI** (e.g. `wss://eu868.chirpstack.io:3001`).
-    * Paste Certificates from ChirpStack (CA, TLS Cert, TLS Key).
-    * *Tip: Press ENTER on an empty line to confirm input.*
+---
 
-3.  **Deploy:**
-    * Enter SSH Target (e.g. `root@192.168.1.10` or `root@localhost -p 2222`).
-    * Choose whether to reboot immediately after installation.
+## 1. Server Setup (ChirpStack)
+Located in the `/server` directory.
 
-## Security
-* **.gitignore:** Prevents keys (`*.key`, `*.crt`) from being committed to git.
-* **Cleanup:** No temporary build files are left on disk.
+Use the `build_ipk.sh` script to create a custom ChirpStack installation package. This script automates the retrieval of configuration files and builds an installable `.ipk` file for the server environment.
+
+**Quick Start:**
+```bash
+cd server
+./build_ipk.sh
