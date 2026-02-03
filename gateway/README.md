@@ -21,6 +21,36 @@ The script is executed locally from your computer (via Git Bash or Terminal) and
 ## Usage
 
 1. Open your terminal (Git Bash on Windows or Terminal on Mac/Linux).
+
 2. Navigate to this directory:
    ```bash
    cd gateway
+Make the script executable (only needed once):
+
+Bash
+chmod +x deploy_gateway.sh
+Run the installer:
+
+Bash
+./deploy_gateway.sh
+Follow the on-screen prompts:
+
+Enter the Gateway IP address.
+
+Enter the gateway password when requested (you may be asked twice: once for file transfer, once for execution).
+
+Paste your certificates when the wizard prompts you.
+
+Confirm the port change and reboot.
+
+Technical Note: Port 1701
+Tektelic gateways often ship with a legacy UDP Packet Forwarder running in the background. This service locks access to the LoRa radio hardware. If Basic Station attempts to use the standard port (1700) or starts without stopping the legacy forwarder, a resource conflict occurs, causing Basic Station to crash with HAL_BUSY errors.
+
+This script configures Basic Station to listen on port 1701 instead. This ensures that both services can coexist without conflict, providing a stable installation without requiring risky modifications to system services.
+
+Troubleshooting
+SCP/SSH Permission Denied: Verify your password and ensure SSH is enabled on the gateway.
+
+Download Failed: Ensure the gateway has an active internet connection to download packages from Tektelic's servers.
+
+Certificate Errors: When pasting certificates, ensure you include the full string, including the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- headers.
